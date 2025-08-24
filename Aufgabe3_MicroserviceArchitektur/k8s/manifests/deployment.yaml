@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immutable-web
+  namespace: immutable-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immutable-web
+  template:
+    metadata:
+      labels:
+        app: immutable-web
+    spec:
+      containers:
+        - name: web
+          # Push your image to your registry and reference it here:
+          image: registry.local:5000/immutable-web:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
