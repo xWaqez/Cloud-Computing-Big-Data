@@ -18,7 +18,7 @@ variable "container_name" {
   default     = "immutable-web"
 }
 
-resource "docker_container" "app" {
+resource "docker_container" "web" {
   name  = var.container_name
   image = "local/immutable-web:${var.image_tag}"
 
@@ -27,7 +27,7 @@ resource "docker_container" "app" {
     external = var.host_port
   }
 
-  // No volumes: no mutation of app content at runtime
+  # Keine Volumes: keine Mutation zur Laufzeit
   restart = "always"
 }
 
