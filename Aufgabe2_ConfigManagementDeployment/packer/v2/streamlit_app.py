@@ -75,8 +75,7 @@ if os.path.exists(OHLCV_FILE):
     # Preis-Chart
     chart = alt.Chart(df_melt).mark_line(interpolate='monotone', strokeWidth=2).encode(
         x=alt.X('timestamp:T', title='Zeit'),
-        y=alt.Y('Price:Q', title='Preis (BTC/USDT)',
-                scale=alt.Scale(nice=False)),
+        y=alt.Y('Price:Q', title='Preis (BTC/USDT)', scale=alt.Scale(nice=False)),
         color=alt.Color('Type:N', scale=farben),
         tooltip=['timestamp:T', 'Type:N', 'Price:Q']
     ).properties(

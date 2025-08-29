@@ -7,27 +7,67 @@ variable "image_tag" {
 }
 
 variable "host_port" {
-  description = "Host port to expose the web app"
+  description = "Host port for the Streamlit frontend"
   type        = number
   default     = 8080
 }
 
-variable "container_name" {
-  description = "Name of the running container"
+variable "name_prefix" {
+  description = "Prefix for container names"
   type        = string
-  default     = "immutable-web"
+  default     = "cfg"
 }
 
-resource "docker_container" "app" {
-  name  = var.container_name
+resource "docker_network" "app" {
+  name = "${var.name_prefix}_net"
+}
+
+locals {
   image = "local/immutable-web:${var.image_tag}"
+}
+
+# Frontend (Streamlit)
+resource "docker_container" "web" {
+  name  = "${var.name_prefix}-web"
+  image = local.image
 
   ports {
-    internal = 80
+    internal = 8501
     external = var.host_port
   }
 
-  // No volumes: no mutation of app content at runtime
+  command = [
+    "streamlit", "run", "/app/streamlit_app.py",
+    "--server.port", "8501",
+    "--server.address", "0.0.0.0"
+  ]
+
+  networks_advanced { name = docker_network.app.name }
+  restart = "always"
+}
+
+# Worker
+resource "docker_container" "tick_collector" {
+  name    = "${var.name_prefix}-tick"
+  image   = local.image
+  command = ["python", "/app/tick_collector.py"]
+  networks_advanced { name = docker_network.app.name }
+  restart = "always"
+}
+
+resource "docker_container" "ohlcv_aggregator" {
+  name    = "${var.name_prefix}-agg"
+  image   = local.image
+  command = ["python", "/app/ohlcv_aggregator.py"]
+  networks_advanced { name = docker_network.app.name }
+  restart = "always"
+}
+
+resource "docker_container" "volatility_detector" {
+  name    = "${var.name_prefix}-vol"
+  image   = local.image
+  command = ["python", "/app/volatility_detector.py"]
+  networks_advanced { name = docker_network.app.name }
   restart = "always"
 }
 

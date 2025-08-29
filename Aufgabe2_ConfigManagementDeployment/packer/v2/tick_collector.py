@@ -4,10 +4,9 @@ import websockets
 import csv
 from datetime import datetime, timezone
 
-SYMBOL = "btcusdt"
+SYMBOL = "btcusdt" 
 WS_URL = f"wss://stream.binance.com:9443/ws/{SYMBOL}@trade"
 OUTPUT_FILE = "ticks.csv"
-
 
 async def collect_ticks():
     async with websockets.connect(WS_URL) as ws:
